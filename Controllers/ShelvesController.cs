@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MyLibrary.Data;
+using MyLibrary.Extensions;
 using MyLibrary.Models;
 using MyLibrary.ViewModels;
 
@@ -30,12 +31,22 @@ public class ShelvesController : Controller
         return randomShelfId;
     }
 
-
     // GET: Shelves
     public async Task<IActionResult> Index()
     {
-        var myLibraryContext = _context.Shelves.Include(s => s.Library);
-        return View(await myLibraryContext.ToListAsync());
+        var shelves = await _context.Shelves
+            .Include(s => s.Books)
+            .Include(s => s.Library)
+            .ToListAsync();
+
+        var shelfViewModels = shelves.Select(shelf => new VMShelfFreeSpaceAndCount
+        {
+            Shelf = shelf,
+            BookCount = shelf.Books.Count,
+            FreeWidth = shelf.FreeSpace()
+        }).ToList();
+
+        return View(shelfViewModels);
     }
 
     // GET: Shelves/Details/5

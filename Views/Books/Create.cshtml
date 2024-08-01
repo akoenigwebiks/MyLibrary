@@ -35,9 +35,9 @@
                     @foreach (var library in Model.LibrariesWithShelves)
                     {
                         <optgroup label="@library.Name">
-                            @foreach (var shelf in library.Shelves)
+                            @foreach (var shelf in library.VMShelfFreeSpaceAndCount)
                             {
-                                <option value="@shelf.ShelfId">@library.Name\@shelf.Number</option>
+                                <option value="@shelf.Shelf.ShelfId">@library.Name\@shelf.Shelf.Number</option>
                             }
                         </optgroup>
                     }
