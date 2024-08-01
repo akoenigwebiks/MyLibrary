@@ -23,5 +23,5 @@ public class Book
     public virtual Shelf Shelf { get; set; }
 
     [ForeignKey("BookSetId")]
-    public virtual BookSet BookSet { get; set; }
+    public virtual BookSet? BookSet { get; set; }
 }
