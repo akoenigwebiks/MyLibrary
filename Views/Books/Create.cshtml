@@ -37,7 +37,9 @@
                         <optgroup label="@library.Name">
                             @foreach (var shelf in library.VMShelfFreeSpaceAndCount)
                             {
-                                <option value="@shelf.Shelf.ShelfId">@library.Name\@shelf.Shelf.Number</option>
+                                <option value="@shelf.Shelf.ShelfId">
+                                    Lib:@library.Name\Number:@shelf.Shelf.Number\Freespace:@shelf.FreeWidth
+                                </option>
                             }
                         </optgroup>
                     }

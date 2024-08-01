@@ -4,9 +4,6 @@ using MyLibrary.Data;
 using MyLibrary.Models;
 using MyLibrary.ViewModels;
 using MyLibrary.Extensions;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace MyLibrary.Controllers
 {
@@ -55,7 +52,7 @@ namespace MyLibrary.Controllers
         {
             var viewModel = new VMAddBook
             {
-                LibrariesWithShelves = await GetLibraryWithShelvesAsync()
+                LibrariesWithShelves = await AvailableShelvesByLibrary()
             };
 
             return View(viewModel);
@@ -84,7 +81,7 @@ namespace MyLibrary.Controllers
                 if (shelf == null || !shelf.HasEnoughSpace(book))
                 {
                     ModelState.AddModelError("", "The selected shelf does not have enough space for the book.");
-                    viewModel.LibrariesWithShelves = await GetLibraryWithShelvesAsync();
+                    viewModel.LibrariesWithShelves = await AvailableShelvesByLibrary();
                     return View(viewModel);
                 }
 
@@ -93,11 +90,15 @@ namespace MyLibrary.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            viewModel.LibrariesWithShelves = await GetLibraryWithShelvesAsync();
+            viewModel.LibrariesWithShelves = await AvailableShelvesByLibrary();
             return View(viewModel);
         }
 
-        private async Task<List<VMLibraryWithShelves>> GetLibraryWithShelvesAsync()
+        /// <summary>
+        /// Gets a list of libraries with shelves that have free space.
+        /// </summary>
+        /// <returns></returns>
+        private async Task<List<VMLibraryWithShelves>> AvailableShelvesByLibrary()
         {
             var libraries = await _context.Libraries
                 .Include(l => l.Shelves)
@@ -108,12 +109,14 @@ namespace MyLibrary.Controllers
             {
                 LibraryId = l.LibraryId,
                 Name = l.Name,
-                VMShelfFreeSpaceAndCount = l.Shelves.Select(shelf => new VMShelfFreeSpaceAndCount
-                {
-                    Shelf = shelf,
-                    BookCount = shelf.Books.Count,
-                    FreeWidth = shelf.FreeSpace()
-                }).ToList()
+                VMShelfFreeSpaceAndCount = l.Shelves
+                    .Where(shelf => shelf.FreeSpace() > 0)
+                    .Select(shelf => new VMShelfFreeSpaceAndCount
+                    {
+                        Shelf = shelf,
+                        BookCount = shelf.Books.Count,
+                        FreeWidth = shelf.FreeSpace()
+                    }).ToList()
             }).ToList();
         }
     }
