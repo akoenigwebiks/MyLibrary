@@ -1,0 +1,60 @@
+﻿@model MyLibrary.ViewModels.VMAddBook
+
+@{
+    ViewData["Title"] = "Create Book";
+}
+
+<h1>Create Book</h1>
+
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Height" class="form-label"></label>
+                <input asp-for="Height" class="form-control" />
+                <span asp-validation-for="Height" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Thickness" class="form-label"></label>
+                <input asp-for="Thickness" class="form-control" />
+                <span asp-validation-for="Thickness" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label>Library and Shelves</label>
+                <select asp-for="ShelfId" class="form-control">
+                    @foreach (var library in Model.LibrariesWithShelves)
+                    {
+                        <optgroup label="@library.Name">
+                            @foreach (var shelf in library.Shelves)
+                            {
+                                <option value="@shelf.ShelfId">@library.Name\@shelf.Number</option>
+                            }
+                        </optgroup>
+                    }
+                </select>
+                <span asp-validation-for="ShelfId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+                <a class="btn btn-secondary ms-2" asp-action="Index">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

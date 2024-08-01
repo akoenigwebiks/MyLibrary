@@ -1,0 +1,58 @@
+﻿@model IEnumerable<MyLibrary.Models.Book>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>@ViewData["Title"]</h2>
+    <a class="btn btn-success" asp-action="Create">Create New</a>
+</div>
+
+<table class="table table-striped table-bordered">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.Height)
+            </th>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.Thickness)
+            </th>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.Shelf.Number)
+            </th>
+            <th scope="col">
+                Library
+            </th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Height)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Thickness)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Shelf.Number)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Shelf.Library.Name)
+                </td>
+                <td>
+                    <a class="btn btn-info btn-sm" asp-action="Details" asp-route-id="@item.BookId">Details</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
