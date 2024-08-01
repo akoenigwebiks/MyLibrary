@@ -52,9 +52,9 @@ namespace MyLibrary.Data
                 new Library { LibraryId = 1, Name = "Main Library" }
             );
 
-            // Global filter example (e.g., for soft delete)
-            modelBuilder.Entity<Book>()
-                .HasQueryFilter(b => EF.Property<bool>(b, "IsDeleted") == false);
+            //// Global filter example (e.g., for soft delete)
+            //modelBuilder.Entity<Book>()
+            //    .HasQueryFilter(b => EF.Property<bool>(b, "IsDeleted") == false);
         }
     }
 }
