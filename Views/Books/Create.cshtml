@@ -1,47 +1,62 @@
-﻿@model MyLibrary.Models.Book
+﻿@model MyLibrary.ViewModels.VMAddBook
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Book";
 }
 
-<h1>Create</h1>
+<h1>Create Book</h1>
 
-<h4>Book</h4>
-<hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6 offset-md-3">
         <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Height" class="control-label"></label>
+
+            <div class="form-group mb-3">
+                <label asp-for="Height" class="form-label"></label>
                 <input asp-for="Height" class="form-control" />
                 <span asp-validation-for="Height" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Width" class="control-label"></label>
-                <input asp-for="Width" class="form-control" />
-                <span asp-validation-for="Width" class="text-danger"></span>
+
+            <div class="form-group mb-3">
+                <label asp-for="Thickness" class="form-label"></label>
+                <input asp-for="Thickness" class="form-control" />
+                <span asp-validation-for="Thickness" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="ShelfId" class="control-label"></label>
-                <select asp-for="ShelfId" class ="form-control" asp-items="ViewBag.ShelfId"></select>
+
+            <div class="form-group mb-3">
+                <label>Library and Shelves</label>
+                <select asp-for="ShelfId" class="form-control">
+                    @foreach (var library in Model.LibrariesWithShelves)
+                    {
+                        <optgroup label="@library.Name">
+                            @foreach (var shelf in library.VMShelfFreeSpaceAndCount)
+                            {
+                                <option value="@shelf.Shelf.ShelfId">
+                                    Lib:@library.Name\Number:@shelf.Shelf.Number\Freespace:@shelf.FreeWidth
+                                </option>
+                            }
+                        </optgroup>
+                    }
+                </select>
+                <span asp-validation-for="ShelfId" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
+                <a class="btn btn-secondary ms-2" asp-action="Index">Back to List</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

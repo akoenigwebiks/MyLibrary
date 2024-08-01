@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyLibrary.Data;
 
@@ -11,9 +12,11 @@ using MyLibrary.Data;
 namespace MyLibrary.Migrations
 {
     [DbContext(typeof(MyLibraryContext))]
-    partial class MyLibraryContextModelSnapshot : ModelSnapshot
+    [Migration("20240801131000_initial")]
+    partial class initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,19 +33,23 @@ namespace MyLibrary.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookId"));
 
-                    b.Property<int?>("BookSetId")
+                    b.Property<int>("BookSetId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Genre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("Height")
                         .HasPrecision(5, 2)
-                        .HasColumnType("decimal(5, 2)");
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<int?>("ShelfId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Thickness")
                         .HasPrecision(5, 2)
-                        .HasColumnType("decimal(5, 2)");
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -51,6 +58,8 @@ namespace MyLibrary.Migrations
                     b.HasKey("BookId");
 
                     b.HasIndex("BookSetId");
+
+                    b.HasIndex("Genre");
 
                     b.HasIndex("ShelfId");
 
@@ -86,14 +95,19 @@ namespace MyLibrary.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LibraryId"));
 
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("LibraryId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("Libraries", (string)null);
 
@@ -101,7 +115,9 @@ namespace MyLibrary.Migrations
                         new
                         {
                             LibraryId = 1,
-                            Name = "Main Library"
+                            Location = "Downtown",
+                            Name = "Main Library",
+                            Type = "General"
                         });
                 });
 
@@ -115,25 +131,22 @@ namespace MyLibrary.Migrations
 
                     b.Property<decimal>("Height")
                         .HasPrecision(5, 2)
-                        .HasColumnType("decimal(5, 2)");
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<int>("LibraryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Number")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Width")
                         .HasPrecision(5, 2)
-                        .HasColumnType("decimal(5, 2)");
+                        .HasColumnType("decimal(5,2)");
 
                     b.HasKey("ShelfId");
 
                     b.HasIndex("LibraryId");
-
-                    b.HasIndex("Number")
-                        .IsUnique();
 
                     b.ToTable("Shelves", (string)null);
                 });
@@ -142,7 +155,9 @@ namespace MyLibrary.Migrations
                 {
                     b.HasOne("MyLibrary.Models.BookSet", "BookSet")
                         .WithMany("Books")
-                        .HasForeignKey("BookSetId");
+                        .HasForeignKey("BookSetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("MyLibrary.Models.Shelf", "Shelf")
                         .WithMany("Books")

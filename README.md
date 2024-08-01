@@ -1,5 +1,10 @@
 ### Finalized Library Management System Specification for MVP
 
+[Original Assignment](./assets/assignment.pdf)
+
+[Current Diagram](https://dbdiagram.io/d/Library-66ab8aeb8b4bb5230ef7b9ac)
+
+
 **Version 1.3**
 
 **Objective:** Develop a streamlined MVP for an ASP.NET MVC application using Entity Framework Core to manage multiple types of libraries (e.g., math, music), each housing shelves, books, and book sets. The MVP focuses exclusively on creation and browsing functionalities.
@@ -23,9 +28,7 @@ The MVP of the Library Management System (LMS) will enable:
 #### Library
 - **Attributes**:
   - LibraryId (int, PK)
-  - Name (string)
-  - Type (string) - e.g., Math, Music
-  - Location (string)
+  - Name (string) - e.g., Math, Music
 - **Relationships**:
   - Has many Shelves
   - Has many Books indirectly through Shelves
@@ -46,7 +49,6 @@ The MVP of the Library Management System (LMS) will enable:
   - BookId (int, PK)
   - ShelfId (int, FK, nullable)
   - Title (string)
-  - Genre (string)
   - Height (decimal)
   - Thickness (decimal)
 - **Relationships**:

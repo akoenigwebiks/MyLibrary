@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyLibrary.Data;
 
@@ -11,9 +12,11 @@ using MyLibrary.Data;
 namespace MyLibrary.Migrations
 {
     [DbContext(typeof(MyLibraryContext))]
-    partial class MyLibraryContextModelSnapshot : ModelSnapshot
+    [Migration("20240801135945_reworked-models")]
+    partial class reworkedmodels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,7 +33,7 @@ namespace MyLibrary.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookId"));
 
-                    b.Property<int?>("BookSetId")
+                    b.Property<int>("BookSetId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Height")
@@ -115,25 +118,22 @@ namespace MyLibrary.Migrations
 
                     b.Property<decimal>("Height")
                         .HasPrecision(5, 2)
-                        .HasColumnType("decimal(5, 2)");
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<int>("LibraryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Number")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Width")
                         .HasPrecision(5, 2)
-                        .HasColumnType("decimal(5, 2)");
+                        .HasColumnType("decimal(5,2)");
 
                     b.HasKey("ShelfId");
 
                     b.HasIndex("LibraryId");
-
-                    b.HasIndex("Number")
-                        .IsUnique();
 
                     b.ToTable("Shelves", (string)null);
                 });
@@ -142,7 +142,9 @@ namespace MyLibrary.Migrations
                 {
                     b.HasOne("MyLibrary.Models.BookSet", "BookSet")
                         .WithMany("Books")
-                        .HasForeignKey("BookSetId");
+                        .HasForeignKey("BookSetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("MyLibrary.Models.Shelf", "Shelf")
                         .WithMany("Books")

@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MyLibrary.Data;
 using MyLibrary.Models;
+using MyLibrary.ViewModels;
+using MyLibrary.Extensions;
 
 namespace MyLibrary.Controllers
 {
@@ -18,8 +19,12 @@ namespace MyLibrary.Controllers
         // GET: Books
         public async Task<IActionResult> Index()
         {
-            var myLibraryContext = _context.Book.Include(b => b.Shelf);
-            return View(await myLibraryContext.ToListAsync());
+            var books = await _context.Books
+                .Include(b => b.Shelf)
+                .ThenInclude(s => s.Library)
+                .ToListAsync();
+
+            return View(books);
         }
 
         // GET: Books/Details/5
@@ -30,9 +35,10 @@ namespace MyLibrary.Controllers
                 return NotFound();
             }
 
-            var book = await _context.Book
+            var book = await _context.Books
                 .Include(b => b.Shelf)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .ThenInclude(s => s.Library)
+                .FirstOrDefaultAsync(m => m.BookId == id);
             if (book == null)
             {
                 return NotFound();
@@ -42,119 +48,76 @@ namespace MyLibrary.Controllers
         }
 
         // GET: Books/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["ShelfId"] = new SelectList(_context.Shelf, "Id", "Id");
-            return View();
+            var viewModel = new VMAddBook
+            {
+                LibrariesWithShelves = await AvailableShelvesByLibrary()
+            };
+
+            return View(viewModel);
         }
 
         // POST: Books/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Height,Width,ShelfId")] Book book)
+        public async Task<IActionResult> Create([Bind("ShelfId,Title,Height,Thickness")] VMAddBook viewModel)
         {
+            ModelState.Remove("LibrariesWithShelves");
             if (ModelState.IsValid)
             {
+                var book = new Book
+                {
+                    ShelfId = viewModel.ShelfId,
+                    Title = viewModel.Title,
+                    Height = viewModel.Height,
+                    Thickness = viewModel.Thickness
+                };
+
+                var shelf = await _context.Shelves
+                    .Include(s => s.Books)
+                    .FirstOrDefaultAsync(s => s.ShelfId == viewModel.ShelfId);
+
+                if (shelf == null || !shelf.HasEnoughSpace(book))
+                {
+                    ModelState.AddModelError("", "The selected shelf does not have enough space for the book.");
+                    viewModel.LibrariesWithShelves = await AvailableShelvesByLibrary();
+                    return View(viewModel);
+                }
+
                 _context.Add(book);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ShelfId"] = new SelectList(_context.Shelf, "Id", "Id", book.ShelfId);
-            return View(book);
+
+            viewModel.LibrariesWithShelves = await AvailableShelvesByLibrary();
+            return View(viewModel);
         }
 
-        // GET: Books/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        /// <summary>
+        /// Gets a list of libraries with shelves that have free space.
+        /// </summary>
+        /// <returns></returns>
+        private async Task<List<VMLibraryWithShelves>> AvailableShelvesByLibrary()
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var libraries = await _context.Libraries
+                .Include(l => l.Shelves)
+                .ThenInclude(s => s.Books)
+                .ToListAsync();
 
-            var book = await _context.Book.FindAsync(id);
-            if (book == null)
+            return libraries.Select(l => new VMLibraryWithShelves
             {
-                return NotFound();
-            }
-            ViewData["ShelfId"] = new SelectList(_context.Shelf, "Id", "Id", book.ShelfId);
-            return View(book);
-        }
-
-        // POST: Books/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Height,Width,ShelfId")] Book book)
-        {
-            if (id != book.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(book);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BookExists(book.Id))
+                LibraryId = l.LibraryId,
+                Name = l.Name,
+                VMShelfFreeSpaceAndCount = l.Shelves
+                    .Where(shelf => shelf.FreeSpace() > 0)
+                    .Select(shelf => new VMShelfFreeSpaceAndCount
                     {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["ShelfId"] = new SelectList(_context.Shelf, "Id", "Id", book.ShelfId);
-            return View(book);
-        }
-
-        // GET: Books/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var book = await _context.Book
-                .Include(b => b.Shelf)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (book == null)
-            {
-                return NotFound();
-            }
-
-            return View(book);
-        }
-
-        // POST: Books/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var book = await _context.Book.FindAsync(id);
-            if (book != null)
-            {
-                _context.Book.Remove(book);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool BookExists(int id)
-        {
-            return _context.Book.Any(e => e.Id == id);
+                        Shelf = shelf,
+                        BookCount = shelf.Books.Count,
+                        FreeWidth = shelf.FreeSpace()
+                    }).ToList()
+            }).ToList();
         }
     }
 }

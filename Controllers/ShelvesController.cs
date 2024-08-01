@@ -2,159 +2,114 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MyLibrary.Data;
+using MyLibrary.Extensions;
 using MyLibrary.Models;
+using MyLibrary.ViewModels;
 
-namespace MyLibrary.Controllers
+namespace MyLibrary.Controllers;
+
+public class ShelvesController : Controller
 {
-    public class ShelvesController : Controller
+    private readonly MyLibraryContext _context;
+
+    public ShelvesController(MyLibraryContext context)
     {
-        private readonly MyLibraryContext _context;
+        _context = context;
+    }
 
-        public ShelvesController(MyLibraryContext context)
+    private int GetRandomShelfId()
+    {
+        Random random = new Random();
+        int randomShelfId;
+
+        do
         {
-            _context = context;
+            randomShelfId = random.Next(1, 1000);
+        }
+        while (_context.Shelves.Any(s => s.ShelfId == randomShelfId));
+
+        return randomShelfId;
+    }
+
+    // GET: Shelves
+    public async Task<IActionResult> Index()
+    {
+        var shelves = await _context.Shelves
+            .Include(s => s.Books)
+            .Include(s => s.Library)
+            .ToListAsync();
+
+        var shelfViewModels = shelves.Select(shelf => new VMShelfFreeSpaceAndCount
+        {
+            Shelf = shelf,
+            BookCount = shelf.Books.Count,
+            FreeWidth = shelf.FreeSpace()
+        }).ToList();
+
+        return View(shelfViewModels);
+    }
+
+    // GET: Shelves/Details/5
+    public async Task<IActionResult> Details(int? id)
+    {
+        if (id == null)
+        {
+            return NotFound();
         }
 
-        // GET: Shelves
-        public async Task<IActionResult> Index()
+        var shelf = await _context.Shelves
+            .Include(s => s.Library)
+            .FirstOrDefaultAsync(m => m.ShelfId == id);
+        if (shelf == null)
         {
-            var myLibraryContext = _context.Shelf.Include(s => s.GenreRoom);
-            return View(await myLibraryContext.ToListAsync());
+            return NotFound();
         }
 
-        // GET: Shelves/Details/5
-        public async Task<IActionResult> Details(int? id)
+        return View(shelf);
+    }
+
+    // GET: Shelves/Create
+    public IActionResult Create()
+    {
+        ViewData["LibraryId"] = new SelectList(_context.Libraries, "LibraryId", "Name");
+        return View();
+    }
+
+    // POST: Shelves/Create
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([Bind("LibraryId,Height,Width")] VMAddShelf VMCreateShelf)
+    {
+        ViewData["LibraryId"] = new SelectList(_context.Libraries, "LibraryId", "Name", VMCreateShelf.LibraryId);
+        if (ModelState.IsValid == false) return View(VMCreateShelf);
+
+        try
         {
-            if (id == null)
+            Shelf newShelf = new()
             {
-                return NotFound();
-            }
-
-            var shelf = await _context.Shelf
-                .Include(s => s.GenreRoom)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (shelf == null)
-            {
-                return NotFound();
-            }
-
-            return View(shelf);
-        }
-
-        // GET: Shelves/Create
-        public IActionResult Create()
-        {
-            ViewData["GenreRoomId"] = new SelectList(_context.GenreRoom, "Id", "Id");
-            return View();
-        }
-
-        // POST: Shelves/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Height,Width,GenreRoomId")] Shelf shelf)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(shelf);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["GenreRoomId"] = new SelectList(_context.GenreRoom, "Id", "Id", shelf.GenreRoomId);
-            return View(shelf);
-        }
-
-        // GET: Shelves/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var shelf = await _context.Shelf.FindAsync(id);
-            if (shelf == null)
-            {
-                return NotFound();
-            }
-            ViewData["GenreRoomId"] = new SelectList(_context.GenreRoom, "Id", "Id", shelf.GenreRoomId);
-            return View(shelf);
-        }
-
-        // POST: Shelves/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Height,Width,GenreRoomId")] Shelf shelf)
-        {
-            if (id != shelf.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(shelf);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ShelfExists(shelf.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["GenreRoomId"] = new SelectList(_context.GenreRoom, "Id", "Id", shelf.GenreRoomId);
-            return View(shelf);
-        }
-
-        // GET: Shelves/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var shelf = await _context.Shelf
-                .Include(s => s.GenreRoom)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (shelf == null)
-            {
-                return NotFound();
-            }
-
-            return View(shelf);
-        }
-
-        // POST: Shelves/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var shelf = await _context.Shelf.FindAsync(id);
-            if (shelf != null)
-            {
-                _context.Shelf.Remove(shelf);
-            }
-
+                LibraryId = VMCreateShelf.LibraryId,
+                Height = VMCreateShelf.Height,
+                Width = VMCreateShelf.Width,
+                Number = GetRandomShelfId().ToString()
+            };
+            _context.Add(newShelf);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
-        private bool ShelfExists(int id)
+        catch (DbUpdateException ex)
         {
-            return _context.Shelf.Any(e => e.Id == id);
+            if (ex.InnerException?.Message.Contains("IX_Shelves_Number") == true)
+            {
+                ModelState.AddModelError("Number", "Shelf number must be unique.");
+            }
+            else
+            {
+                ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
+            }
+            return View(VMCreateShelf);
         }
     }
 }
+

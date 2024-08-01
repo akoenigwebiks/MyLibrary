@@ -1,42 +1,39 @@
-﻿@model MyLibrary.Models.Shelf
+﻿@model MyLibrary.ViewModels.VMAddShelf
 
 @{
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
-
-<h4>Shelf</h4>
+<h1>Create Shelf</h1>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6 offset-md-3">
         <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Height" class="control-label"></label>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="form-group mb-3">
+                <label asp-for="LibraryId" class="form-label"></label>
+                <select asp-for="LibraryId" class="form-control" asp-items="ViewBag.LibraryId"></select>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Height" class="form-label"></label>
                 <input asp-for="Height" class="form-control" />
                 <span asp-validation-for="Height" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Width" class="control-label"></label>
+            <div class="form-group mb-3">
+                <label asp-for="Width" class="form-label"></label>
                 <input asp-for="Width" class="form-control" />
                 <span asp-validation-for="Width" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="GenreRoomId" class="control-label"></label>
-                <select asp-for="GenreRoomId" class ="form-control" asp-items="ViewBag.GenreRoomId"></select>
-            </div>
-            <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
+                <a class="btn btn-secondary ms-2" asp-action="Index">Back to List</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

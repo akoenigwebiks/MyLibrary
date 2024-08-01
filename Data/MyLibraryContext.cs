@@ -1,71 +1,60 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using MyLibrary.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using MyLibrary.Models; // Ensure your models are referenced correctly
 
 namespace MyLibrary.Data
 {
     public class MyLibraryContext : DbContext
     {
-        public MyLibraryContext (DbContextOptions<MyLibraryContext> options)
+        public MyLibraryContext(DbContextOptions<MyLibraryContext> options)
             : base(options)
         {
         }
+
+        public DbSet<Library> Libraries { get; set; }
+        public DbSet<Book> Books { get; set; }
+        public DbSet<BookSet> BookSets { get; set; }
+        public DbSet<Shelf> Shelves { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure GenreRoom
-            modelBuilder.Entity<GenreRoom>()
-                .HasMany(g => g.Shelves)
-                .WithOne(s => s.GenreRoom)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of GenreRoom if Shelves exist
+            // Custom table names
+            modelBuilder.Entity<Library>().ToTable("Libraries");
+            modelBuilder.Entity<Book>().ToTable("Books");
+            modelBuilder.Entity<BookSet>().ToTable("BookSets");
+            modelBuilder.Entity<Shelf>().ToTable("Shelves");
 
-            // Configure Shelf
+            // Configure decimal properties with specified precision and scale
+            modelBuilder.Entity<Book>()
+                .Property(b => b.Height)
+                .HasPrecision(5, 2);
+            modelBuilder.Entity<Book>()
+                .Property(b => b.Thickness)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<Shelf>()
+                .Property(s => s.Height)
+                .HasPrecision(5, 2);
+            modelBuilder.Entity<Shelf>()
+                .Property(s => s.Width)
+                .HasPrecision(5, 2);
+
+            // Configure relationships
             modelBuilder.Entity<Shelf>()
                 .HasMany(s => s.Books)
                 .WithOne(b => b.Shelf)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of Shelf if Books exist
-
-            modelBuilder.Entity<Shelf>()
-                .HasOne(s => s.GenreRoom)
-                .WithMany(g => g.Shelves)
-                .HasForeignKey(s => s.GenreRoomId)
-                .OnDelete(DeleteBehavior.Restrict); // Optional: Prevent Shelf deletion affecting GenreRoom, though this is likely not necessary unless GenreRoom deletion is intended to cascade.
-
-            // Configure Book
-            modelBuilder.Entity<Book>()
-                .HasOne(b => b.Shelf)
-                .WithMany(s => s.Books)
                 .HasForeignKey(b => b.ShelfId)
-                .OnDelete(DeleteBehavior.Cascade); // Allow deletion of Book without restriction
+                .OnDelete(DeleteBehavior.Cascade); // Cascading delete from Shelf to Books
 
-            // Configure BookSet
-            modelBuilder.Entity<BookSet>()
-                .HasOne(bs => bs.GenreRoom)
-                .WithMany()
-                .HasForeignKey(bs => bs.GenreRoomId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of GenreRoom from deleting BookSet
+            // Seed data
+            modelBuilder.Entity<Library>().HasData(
+                new Library { LibraryId = 1, Name = "Main Library" }
+            );
 
-            modelBuilder.Entity<BookSet>()
-                .HasMany(bs => bs.Books)
-                .WithOne()
-                .OnDelete(DeleteBehavior.Cascade); // Allow deletion of BookSet to cascade to Books
-
-            modelBuilder.Entity<BookSet>()
-                .HasOne(bs => bs.Shelf)
-                .WithMany()
-                .HasForeignKey(bs => bs.ShelfId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of Shelf from deleting BookSet
+            //// Global filter example (e.g., for soft delete)
+            //modelBuilder.Entity<Book>()
+            //    .HasQueryFilter(b => EF.Property<bool>(b, "IsDeleted") == false);
         }
-
-        public DbSet<MyLibrary.Models.GenreRoom> GenreRoom { get; set; } = default!;
-        public DbSet<MyLibrary.Models.Book> Book { get; set; } = default!;
-        public DbSet<MyLibrary.Models.BookSet> BookSet { get; set; } = default!;
-        public DbSet<MyLibrary.Models.Shelf> Shelf { get; set; } = default!;
-
     }
 }
