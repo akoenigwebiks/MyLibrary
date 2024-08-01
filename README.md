@@ -1,5 +1,7 @@
 ### Finalized Library Management System Specification for MVP
 
+[Original Assignment](./assets/assignment.pdf)
+
 [Current Diagram](https://dbdiagram.io/d/Library-66ab8aeb8b4bb5230ef7b9ac)
 
 
