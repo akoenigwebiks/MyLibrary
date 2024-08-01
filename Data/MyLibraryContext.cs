@@ -49,12 +49,8 @@ namespace MyLibrary.Data
 
             // Seed data
             modelBuilder.Entity<Library>().HasData(
-                new Library { LibraryId = 1, Name = "Main Library", Type = "General", Location = "Downtown" }
+                new Library { LibraryId = 1, Name = "Main Library" }
             );
-
-            // Indexes
-            modelBuilder.Entity<Book>()
-                .HasIndex(b => b.Genre);
 
             // Global filter example (e.g., for soft delete)
             modelBuilder.Entity<Book>()
