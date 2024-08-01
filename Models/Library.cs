@@ -1,6 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 namespace MyLibrary.Models;
 
+[Index(nameof(Name), IsUnique = true)]
 public class Library
 {
     [Key]
@@ -8,11 +10,6 @@ public class Library
 
     [Required]
     public string Name { get; set; }
-
-    [Required]
-    public string Type { get; set; }
-
-    public string Location { get; set; }
 
     // Navigation property
     public virtual ICollection<Shelf> Shelves { get; set; }

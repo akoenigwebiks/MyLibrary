@@ -28,9 +28,7 @@ The MVP of the Library Management System (LMS) will enable:
 #### Library
 - **Attributes**:
   - LibraryId (int, PK)
-  - Name (string)
-  - Type (string) - e.g., Math, Music
-  - Location (string)
+  - Name (string) - e.g., Math, Music
 - **Relationships**:
   - Has many Shelves
   - Has many Books indirectly through Shelves
@@ -51,7 +49,6 @@ The MVP of the Library Management System (LMS) will enable:
   - BookId (int, PK)
   - ShelfId (int, FK, nullable)
   - Title (string)
-  - Genre (string)
   - Height (decimal)
   - Thickness (decimal)
 - **Relationships**:

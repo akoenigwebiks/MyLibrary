@@ -6,16 +6,16 @@ public class Book
 {
     [Key]
     public int BookId { get; set; }
-    
+
     public int? ShelfId { get; set; }
 
     [Required]
     public string Title { get; set; }
 
-    public string Genre { get; set; }
-
+    [Column(TypeName = "decimal(5, 2)")]
     public decimal Height { get; set; }
 
+    [Column(TypeName = "decimal(5, 2)")]
     public decimal Thickness { get; set; }
 
     // Navigation properties
