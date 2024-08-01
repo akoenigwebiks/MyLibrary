@@ -1,0 +1,52 @@
+﻿@model IEnumerable<MyLibrary.Models.Shelf>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>@ViewData["Title"]</h2>
+    <a class="btn btn-success" asp-action="Create">Create New</a>
+</div>
+
+<table class="table table-striped table-bordered">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.Number)
+            </th>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.Height)
+            </th>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.Width)
+            </th>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.Library.Name)
+            </th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Number)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Height)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Width)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Library.Name)
+                </td>
+                <td>
+                    <a class="btn btn-info btn-sm" asp-action="Details" asp-route-id="@item.ShelfId">Details</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
