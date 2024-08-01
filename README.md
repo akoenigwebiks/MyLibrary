@@ -1,5 +1,8 @@
 ### Finalized Library Management System Specification for MVP
 
+[Current Diagram](https://dbdiagram.io/d/Library-66ab8aeb8b4bb5230ef7b9ac)
+
+
 **Version 1.3**
 
 **Objective:** Develop a streamlined MVP for an ASP.NET MVC application using Entity Framework Core to manage multiple types of libraries (e.g., math, music), each housing shelves, books, and book sets. The MVP focuses exclusively on creation and browsing functionalities.
