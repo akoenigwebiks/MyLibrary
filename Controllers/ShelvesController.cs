@@ -17,16 +17,17 @@ public class ShelvesController : Controller
         _context = context;
     }
 
-    private int GetRandomShelfId()
+    // TODO fix this crap
+    private int GetRandomShelfNumber()
     {
         Random random = new Random();
         int randomShelfId;
 
         do
         {
-            randomShelfId = random.Next(1, 1000);
+            randomShelfId = random.Next(1, 100000000);
         }
-        while (_context.Shelves.Any(s => s.ShelfId == randomShelfId));
+        while (_context.Shelves.Any(s => s.Number == randomShelfId.ToString()));
 
         return randomShelfId;
     }
@@ -92,7 +93,7 @@ public class ShelvesController : Controller
                 LibraryId = VMCreateShelf.LibraryId,
                 Height = VMCreateShelf.Height,
                 Width = VMCreateShelf.Width,
-                Number = GetRandomShelfId().ToString()
+                Number = GetRandomShelfNumber().ToString()
             };
             _context.Add(newShelf);
             await _context.SaveChangesAsync();
