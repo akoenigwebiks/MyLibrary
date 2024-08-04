@@ -1,0 +1,34 @@
+﻿@model IEnumerable<MyLibrary.Models.Library>
+
+@{
+    ViewData["Title"] = "Libraries";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>@ViewData["Title"]</h2>
+    <a class="btn btn-success" asp-action="Create">Create New</a>
+</div>
+
+<table class="table table-striped table-bordered">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    <a class="btn btn-info btn-sm" asp-action="Details" asp-route-id="@item.LibraryId">Details</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,11 +1,17 @@
-﻿namespace MyLibrary.Models;
+﻿using System.ComponentModel.DataAnnotations;
+namespace MyLibrary.Models;
+
 public class BookSet
 {
-    public int Id { get; set; }
-    public int GenreRoomId { get; set; }
-    public virtual GenreRoom GenreRoom { get; set; }
+    [Key]
+    public int BookSetId { get; set; }
+
+    [Required]
+    public string Title { get; set; }
+
+    public string Description { get; set; }
+
+    // Navigation property
     public virtual ICollection<Book> Books { get; set; }
-    public int ShelfId { get; set; }
-    public virtual Shelf Shelf { get; set; }
 }
 
