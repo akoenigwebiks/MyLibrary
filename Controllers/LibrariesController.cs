@@ -52,28 +52,30 @@ namespace MyLibrary.Controllers
         public async Task<IActionResult> Create([Bind("Name")] Library library)
         {
             ModelState.Remove("Shelves");
-            if (ModelState.IsValid)
+
+            if (ModelState.IsValid == false)
             {
-                try
-                {
-                    if (_context.Libraries.Any(l => l.Name == library.Name))
-                    {
-                        ModelState.AddModelError("Name", "Library name must be unique.");
-                        return View(library);
-                    }
-
-                    _context.Add(library);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (DbUpdateException ex)
-                {
-                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
-                }
+                return View(library);
             }
-            return View(library);
+
+            try
+            {
+                if (_context.Libraries.Any(l => l.Name == library.Name))
+                {
+                    ModelState.AddModelError("Name", "Library name must be unique.");
+                    return View(library);
+                }
+
+                _context.Add(library);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException ex)
+            {
+                ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
+                return View(library);
+            }
+
         }
-
-
     }
 }
