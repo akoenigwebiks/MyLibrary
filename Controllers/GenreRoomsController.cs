@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using MyLibrary.Data;
 using MyLibrary.Models;
+using MyLibrary.ViewModels;
 
 namespace MyLibrary.Controllers
 {
@@ -41,7 +43,7 @@ namespace MyLibrary.Controllers
         // GET: GenreRooms/Create
         public IActionResult Create()
         {
-            return View();
+            return View(new VMAddGenre());
         }
 
         // POST: GenreRooms/Create
@@ -49,16 +51,36 @@ namespace MyLibrary.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] GenreRoom genreRoom)
+        public async Task<IActionResult> Create([Bind("Name")] VMAddGenre vMAddGenre)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(genreRoom);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    // Add new GenreRoom to the database context
+                    _context.Add(new GenreRoom { Name = vMAddGenre.Name });
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateException ex)
+                {
+                    // Check if the exception is due to a unique constraint violation
+                    if (ex.InnerException is SqlException sqlEx && (sqlEx.Number == 2627 || sqlEx.Number == 2601))
+                    {
+                        // Add a model error to indicate the uniqueness violation
+                        ModelState.AddModelError("Name", "A GenreRoom with this name already exists.");
+                    }
+                    else
+                    {
+                        // Log the exception or handle it differently
+                        ModelState.AddModelError("", "An error occurred while creating the GenreRoom.");
+                    }
+                }
             }
-            return View(genreRoom);
+            // Return the view with validation errors if any
+            return View(vMAddGenre);
         }
+
 
         // GET: GenreRooms/Edit/5
         public async Task<IActionResult> Edit(int? id)
