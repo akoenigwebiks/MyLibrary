@@ -6,6 +6,10 @@ public static class ShelfExtension
 {
     public static double FreeSpace(this Shelf shelf) => (double)(shelf.Width - shelf.Books.Sum(b => b.Thickness));
 
+    // shelf.FreeSpace()
+    // var exs = new ShelfExtension();
+    // exs.FreeSpace(shelf);
+
     /// <summary>
     /// a method that takes in this shelf and book 
     /// and returns a boolean indicating if the shelf has enough space for the book 
@@ -15,13 +19,19 @@ public static class ShelfExtension
     /// <returns></returns>
     public static bool HasEnoughSpace(this Shelf shelf, Book book)
     {
-        if (book.Height > shelf.Height)
-        {
-            return false;
-        }
+        //if (book.Height > shelf.Height)
+        //{
+        //    return false;
+        //}
 
-        var totalThickness = shelf.FreeSpace() + (double)book.Thickness;
-        return totalThickness <= (double)shelf.Width;
+        //return (double)book.Thickness <= shelf.FreeSpace();
+
+        return shelf switch
+        {
+            _ when book.Height > shelf.Height => false,
+            _ when (double)book.Thickness <= shelf.FreeSpace() => true,
+            _ => false
+        };
     }
 }
 
